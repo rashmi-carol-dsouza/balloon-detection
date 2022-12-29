@@ -18,7 +18,31 @@
       <div class="container">
         <div class="row">
             <div class="col-6 mx-auto mt-5 text-center">
-                <hi class="mb-5">Flask image upload and show</hi>
+                <h1 class="mb-5">Flask image upload and show</h1>
+                <form method="post" enctype="multipart/form-data">
+                    {{form.hidden_tag()}}
+
+                    {% for error in form.photo.errors %}
+                        <span style="color:red;">{{error}}</span>
+                    {% endfor%}
+
+                    <div class="row justify-content-center">
+                        <div class="col-auto">
+                            {{form.photo(class="form-control")}}
+                        </div>
+                        <div class="col-auto">
+                            {{form.submit(class="btn btn-success")}}
+                        </div>
+                    </div>    
+
+                </form>
+
+                {% if file_url %}
+                    <div class="mt5">
+                        <img src="{{ file_url }}" style="width: 800px;">   
+                    </div>
+
+                {% endif %}    
             </div>        
         </div>        
       </div>
