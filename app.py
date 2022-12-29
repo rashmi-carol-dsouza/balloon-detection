@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,render_template
 # import requests
 # import json
 # import pandas as pd
@@ -6,9 +6,12 @@ from flask import Flask
 # from model import geoloc
 
 app = Flask(__name__)
-@app.route("/")
+
+
+@app.route("/",methods=["GET","POST"])
 def home():
-    return "Hello, Flask!"
+    return render_template("index.html")
+
 
 # @app.route("/toilets",methods=["GET"])
 # def toilet():
