@@ -33,8 +33,8 @@ def pretrained_model(filename):
 
     # Model prediction
     results = model(img)
-    results.save(save_dir='results')    
-    print(results.pandas().xyxy[0].value_counts('name'))
+    results.save(save_dir='result/results')    
+    return results.pandas().xyxy[0].value_counts('name')
     
 
 
@@ -47,13 +47,15 @@ def get_file(filename):
 @app.route("/",methods=["GET","POST"])
 def home():
     form = UploadForm()
+    file_url = None
+    data = None
+
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file",filename=filename)
-        pretrained_model(f'uploads/{filename}')
-    else:
-        file_url=None
-    return render_template("index.html",form=form,file_url=file_url)
+        data = pretrained_model(f'uploads/{filename}')
+    
+    return render_template("index.html",form=form,file_url=file_url,data=data)
 
 
        
