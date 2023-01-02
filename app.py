@@ -28,7 +28,6 @@ def pretrained_model(filename):
     model = torch.hub.load('yolov5','custom', path='best.pt',force_reload=True,source='local')
 
     # Image processing
-    # img = "uploads/audrey-martin-FJpHcqMud_Y-unsplash.jpg"
     img = filename
 
     # Model prediction
