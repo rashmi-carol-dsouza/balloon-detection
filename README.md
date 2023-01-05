@@ -13,6 +13,20 @@ https:/go.microsoft.com/fwlink/?LinkID=135170. Try this -
 Set-ExecutionPolicy Unrestricted -Scope Process
 ```
 
+### Recommending using python 3.8 for all libraries' compatibility
+#### 1. Install virtualenv library
+```
+sudo pip3 install virtualenv
+```
+#### 2. Setup a virtual enviornment named 'env'
+```
+python3.8 -m venv env
+```
+#### 3. Activate 'env'
+```
+source env/bin/activate
+```
+
 ## Installing Requirements
 
 ``` 
@@ -27,4 +41,9 @@ pip3 install -r requirements.txt
 
 ```
 python app.py
+```
+## Exiting the app
+
+```
+Ctr + c
 ```
