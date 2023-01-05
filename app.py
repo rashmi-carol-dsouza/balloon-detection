@@ -78,6 +78,7 @@ def plot_finetuned_results(pil_img, prob=None, boxes=None):
     plt.imshow(pil_img)
     ax = plt.gca()
     count_balloon = 0
+    num = 0
     colors = COLORS * 100
     if prob is not None and boxes is not None:
         for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes.tolist(), colors):
@@ -85,6 +86,7 @@ def plot_finetuned_results(pil_img, prob=None, boxes=None):
             label = finetuned_classes[cl]
             if label == "balloon":
                 count_balloon += 1
+                num +=1
                 text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin,
                              ymax - ymin, fill=False, color=c, linewidth=3))
@@ -92,7 +94,7 @@ def plot_finetuned_results(pil_img, prob=None, boxes=None):
                         bbox=dict(facecolor='yellow', alpha=0.5))
     print("Number of balloons detected: {}".format(count_balloon))
     plt.axis('off')
-    plt.savefig('detr_results/new.jpg')
+    plt.savefig(f'detr_results/new{1}.jpg')
     return count_balloon
     
 
