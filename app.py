@@ -218,8 +218,8 @@ def home():
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file",filename=filename)
-        data = yolo(filename)
-        # data = detr(f'uploads/{filename}')
+        # data = yolo(filename)
+        data = detr(f'uploads/{filename}')
         #Levin - to get the prediction text
         data_face = happyface_model(filename)
     
