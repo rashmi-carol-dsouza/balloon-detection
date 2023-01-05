@@ -10,6 +10,7 @@ import torchvision.transforms as T
 import torch
 import matplotlib.pyplot as plt
 
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "asddfgh"
 app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
@@ -118,7 +119,7 @@ def detr(filename):
     return run_worflow(im, model)
 
 
-def pretrained_model(filename):
+def yolo(filename):
     # Loading the model
     model = torch.hub.load('yolov5', 'custom', path='best.pt', force_reload=True, source='local')
 
@@ -137,7 +138,8 @@ def pretrained_model(filename):
 def happyface_model(filename):
     # Load the model    
     # load json and create model
-    from tensorflow.keras.models import model_from_json
+    from tensorflow import keras
+    from keras.models import model_from_json
     json_file = open('dcnn-happy-face/model.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
@@ -216,8 +218,8 @@ def home():
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file",filename=filename)
-        data = pretrained_model(f'uploads/{filename}')
-        data = detr(f'uploads/{filename}')
+        data = yolo(filename)
+        # data = detr(f'uploads/{filename}')
         #Levin - to get the prediction text
         data_face = happyface_model(filename)
     
