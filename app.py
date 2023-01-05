@@ -69,6 +69,7 @@ COLORS = [[0.000, 0.447, 0.741], [0.850, 0.325, 0.098], [0.929, 0.694, 0.125],
           [0.494, 0.184, 0.556], [0.466, 0.674, 0.188], [0.301, 0.745, 0.933]]
 
 
+
 def plot_finetuned_results(pil_img, prob=None, boxes=None):
     finetuned_classes = ['balloon']
     plt.figure(figsize=(16, 10))
@@ -88,8 +89,10 @@ def plot_finetuned_results(pil_img, prob=None, boxes=None):
                 ax.text(xmin, ymin, text, fontsize=10,
                         bbox=dict(facecolor='yellow', alpha=0.5))
     print("Number of balloons detected: {}".format(count_balloon))
-    # plt.axis('off')
-    # plt.show()
+    plt.axis('off')
+    plt.savefig('detr_results/new.jpg')
+    return count_balloon
+    
 
 
 def run_worflow(my_image, my_model):
@@ -99,9 +102,19 @@ def run_worflow(my_image, my_model):
     # propagate through the model
     outputs = my_model(img)
 
-    for threshold in [0.9, 0.85, 0.75]:
-        probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(my_image, outputs, threshold=threshold)
-        plot_finetuned_results(my_image, probas_to_keep, bboxes_scaled)
+    threshold = 0.75
+    probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(my_image, outputs, threshold=threshold)
+    return plot_finetuned_results(my_image, probas_to_keep, bboxes_scaled)
+
+
+def detr(filename):
+    model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=False, num_classes=1)
+    checkpoint = torch.load('checkpoint.pth', map_location='cpu')
+    model.load_state_dict(checkpoint['model'], strict=False)
+    model.eval()
+
+    im = Image.open(filename)
+    return run_worflow(im, model)
 
 
 def pretrained_model(filename):
@@ -116,56 +129,7 @@ def pretrained_model(filename):
     results.save(save_dir='result/results')
     return results.pandas().xyxy[0].value_counts('name')
 
-def detr_model(pil_img, my_image,my_model,filename, prob=None, boxes=None):
-    finetuned_classes = ['balloon']
-    plt.figure(figsize=(16, 10))
-    plt.imshow(pil_img)
-    ax = plt.gca()
-    count_balloon = 0
-    colors = COLORS * 100
-    if prob is not None and boxes is not None:
-        for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes.tolist(), colors):
-            cl = p.argmax()
-            label = finetuned_classes[cl]
-            if label == "balloon":
-                count_balloon += 1
-                text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
-                ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin,
-                             ymax - ymin, fill=False, color=c, linewidth=3))
-                ax.text(xmin, ymin, text, fontsize=10,
-                        bbox=dict(facecolor='yellow', alpha=0.5))
-    print("Number of balloons detected: {}".format(count_balloon))
-    # plt.axis('off')
-    # plt.show()
-    img = transform(my_image).unsqueeze(0)
 
-    # propagate through the model
-    outputs = my_model(img)
-
-    for threshold in [0.9, 0.85, 0.75]:
-        probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(my_image, outputs, threshold=threshold)
-        plot_finetuned_results(my_image, probas_to_keep, bboxes_scaled)
-    
-    model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=False, num_classes=1)
-    checkpoint = torch.load('checkpoint.pth', map_location='cpu')
-    model.load_state_dict(checkpoint['model'], strict=False)
-    model.eval()
-
-    im = Image.open(filename)
-    run_worflow(im, model)
-    return count_balloon
-    
-
-
-
-def detr(filename):
-    model = torch.hub.load('facebookresearch/detr', 'detr_resnet50', pretrained=False, num_classes=1)
-    checkpoint = torch.load('checkpoint.pth', map_location='cpu')
-    model.load_state_dict(checkpoint['model'], strict=False)
-    model.eval()
-
-    im = Image.open(filename)
-    run_worflow(im, model)
 
 
 @app.route("/uploads/<filename>")
@@ -183,7 +147,7 @@ def home():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file", filename=filename)
         # data = pretrained_model(f'uploads/{filename}')
-        newdata = detr(f'uploads/{filename}')
+        data = detr(f'uploads/{filename}')
 
     return render_template("index.html", form=form, file_url=file_url, data=data)
 
