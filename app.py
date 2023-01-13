@@ -229,11 +229,11 @@ def home():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file",filename=filename)
         # Yolo model
-        data = yolo(filename)
+        data,number = yolo(filename)
         # Detr Model
         # data = detr(f'uploads/{filename}')
         #Levin - to get the prediction text
-        data_face = happyface_model(filename)
+        data_face = happyface_model(filename,number)
     
     return render_template("index.html",form=form,file_url=file_url,data=data,data_face=data_face)
 
