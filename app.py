@@ -1,3 +1,4 @@
+# imports
 from flask import Flask, render_template, send_from_directory, url_for
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from flask_wtf import FlaskForm
@@ -10,12 +11,12 @@ import torchvision.transforms as T
 import torch
 import matplotlib.pyplot as plt
 
-
+# Flask app
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "asddfgh"
 app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 
-
+# Code for detr model
 transform = T.Compose([
     T.Resize(600),
     T.ToTensor(),
@@ -106,7 +107,7 @@ def run_worflow(my_image, my_model):
     # propagate through the model
     outputs = my_model(img)
 
-    threshold = 0.75
+    threshold = 0.80
     probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(my_image, outputs, threshold=threshold)
     return plot_finetuned_results(my_image, probas_to_keep, bboxes_scaled)
 
@@ -120,7 +121,7 @@ def detr(filename):
     im = Image.open(filename)
     return run_worflow(im, model)
 
-
+# Code for yolo model
 def yolo(filename):
     # Loading the model
     model = torch.hub.load('yolov5', 'custom', path='best.pt', force_reload=True, source='local')
@@ -132,11 +133,19 @@ def yolo(filename):
     results = model(img)
     
     # Save result
-    results.save(save_dir = f'result/balloon_processing/{filename}')    
+    results.save(save_dir = f'result/balloon_processing/{filename}')
+    number =  results.pandas().xyxy[0].value_counts('name').tolist()[0] 
+    # output for frontend
+    if number >= 5:
+        output = f'Wow, you have {number} ballons. What a great party!!!'
+    elif number == 0:
+        output = f'OH No, we dont see any balloons. What a great party!!!'
+    else:
+        output = f'We see {number} ballons. Maybe you shoud get more balloons!!'
+    
+    return output
 
-    return results.pandas().xyxy[0].value_counts('name')
-
-# Levin
+# Levin - code for happyface detection model
 def happyface_model(filename):
     # Load the model    
     # load json and create model
@@ -204,12 +213,13 @@ def happyface_model(filename):
 
     return output
    
-
+# saving uploaded image
 @app.route("/uploads/<filename>")
 def get_file(filename):
     return send_from_directory(app.config["UPLOADED_PHOTOS_DEST"], filename)
 
 
+# render index page, perdict result for uploded images
 @app.route("/", methods=["GET", "POST"])
 def home():
     form = UploadForm()
@@ -220,8 +230,10 @@ def home():
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for("get_file",filename=filename)
-        # data = yolo(filename)
-        data = detr(f'uploads/{filename}')
+        # Yolo model
+        data = yolo(filename)
+        # Detr Model
+        # data = detr(f'uploads/{filename}')
         #Levin - to get the prediction text
         data_face = happyface_model(filename)
     
