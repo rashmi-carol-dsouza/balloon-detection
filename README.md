@@ -47,3 +47,7 @@ python app.py
 ```
 Ctr + c
 ```
+
+## Yolov5 files and Detr model
+
+https://drive.google.com/file/d/1Fe0g6vzAFjM58ZhKj4N6G00I927Vp4V4/view?usp=sharing
